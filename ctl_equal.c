@@ -168,6 +168,7 @@ SND_CTL_PLUGIN_DEFINE_FUNC(equal)
 	const char *controls = ".alsaequal.bin";
 	const char *library = "caps.so";
 	const char *module = "Eq10";
+	const char *pluginName = NULL;
 	long channels = 2;
 	const char *sufix = " Playback Volume";
 	int err, i, index;
@@ -200,6 +201,16 @@ SND_CTL_PLUGIN_DEFINE_FUNC(equal)
 			}
 			continue;
 		}
+		if (strcmp(id, "hint") == 0) {
+			snd_config_t *desc;
+			const char *str;
+			if ((snd_config_get_type(n) == SND_CONFIG_TYPE_COMPOUND) &&
+				(snd_config_search(n, "description", &desc) >= 0) &&
+				(snd_config_get_string(desc, &str) >= 0)) {
+				pluginName = str;
+			}
+			continue;
+		}
 		SNDERR("Unknown field %s", id);
 		return -EINVAL;
 	}
@@ -226,11 +237,15 @@ SND_CTL_PLUGIN_DEFINE_FUNC(equal)
 		return -1;
 	}
 
+	if (pluginName == NULL) {
+		pluginName = equal->klass->Label;
+	}
+
 	/* Import data from the LADSPA Plugin */
 	strncpy(equal->ext.id, equal->klass->Label, sizeof(equal->ext.id) - 1);
 	equal->ext.id[sizeof(equal->ext.id) - 1] = '\0';
 	strncpy(equal->ext.driver, "LADSPA Plugin", sizeof(equal->ext.driver));
-	strncpy(equal->ext.name, equal->klass->Label, sizeof(equal->ext.name) - 1);
+	strncpy(equal->ext.name, pluginName, sizeof(equal->ext.name) - 1);
 	equal->ext.name[sizeof(equal->ext.name) - 1] = '\0';
 	strncpy(equal->ext.longname, equal->klass->Name,
 			sizeof(equal->ext.longname) - 1);

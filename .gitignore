@@ -1,0 +1,7 @@
+*.so.*
+*.so
+*.so.debug
+*.o
+*.swp
+core
+*.log

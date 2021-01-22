@@ -5,7 +5,7 @@ Q	?= @
 
 # Build Tools
 CC 	:= gcc
-CFLAGS := -I. -O2 -Wall -funroll-loops -ffast-math -fPIC -DPIC -g
+CFLAGS := -I. -O2 -Wall -funroll-loops -ffast-math -fPIC -DPIC
 LD := gcc
 LDFLAGS := -O2 -Wall -shared -lasound
 

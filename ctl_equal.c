@@ -21,7 +21,7 @@
 #include <alsa/asoundlib.h>
 #include <alsa/control_external.h>
 
-#include "ladspa.h"
+#include <ladspa.h>
 #include "ladspa_utils.h"
 
 typedef struct snd_ctl_equal_control {
@@ -73,12 +73,12 @@ static snd_ctl_ext_key_t equal_find_elem(snd_ctl_ext_t *ext,
 {
 	snd_ctl_equal_t *equal = ext->private_data;
 	const char *name;
-	unsigned int i, key;
+	unsigned int i;
 
 	name = snd_ctl_elem_id_get_name(id);
 
 	for (i = 0; i < equal->num_input_controls; i++) {
-		key = i;
+		unsigned int key = i;
 		if (!strcmp(name, equal->control_info[key].name)) {
 			return key;
 		}
@@ -127,10 +127,9 @@ static int equal_write_integer(snd_ctl_ext_t *ext, snd_ctl_ext_key_t key,
 {
 	snd_ctl_equal_t *equal = ext->private_data;
 	int i;
-	float setting;
 
 	for(i = 0; i < equal->control_data->channels; i++) {
-		setting = value[i];
+		float setting = value[i];
 		equal->control_data->control[key].data[i] = (setting/100)*
 			(equal->control_info[key].max-
 			equal->control_info[key].min)+
@@ -263,14 +262,14 @@ SND_CTL_PLUGIN_DEFINE_FUNC(equal)
 	if(equal->control_data == NULL) {
 		return -1;
 	}
-	
+
 	equal->num_input_controls = 0;
 	for(i = 0; i < equal->control_data->num_controls; i++) {
 		if(equal->control_data->control[i].type == LADSPA_CNTRL_INPUT) {
 			equal->num_input_controls++;
 		}
 	}
-	
+
 	/* Pull in data from controls file */
 	equal->control_info = malloc(
 			sizeof(snd_ctl_equal_control_t)*equal->num_input_controls);
@@ -282,7 +281,8 @@ SND_CTL_PLUGIN_DEFINE_FUNC(equal)
 		if(equal->control_data->control[i].type == LADSPA_CNTRL_INPUT) {
 			index = equal->control_data->control[i].index;
 			if((equal->klass->PortDescriptors[index] &
-					(LADSPA_PORT_INPUT | LADSPA_PORT_CONTROL)) == 0) {
+					(LADSPA_PORT_INPUT | LADSPA_PORT_CONTROL)) !=
+					(LADSPA_PORT_INPUT | LADSPA_PORT_CONTROL)) {
 				SNDERR("Problem with control file %s, %d.", controls, index);
 				return -1;
 			}
@@ -302,12 +302,14 @@ SND_CTL_PLUGIN_DEFINE_FUNC(equal)
 	}
 
 	/* Make sure that the control file makes sense */
-	if(equal->klass->PortDescriptors[equal->control_data->input_index] !=
+	if((equal->klass->PortDescriptors[equal->control_data->input_index] &
+			(LADSPA_PORT_INPUT | LADSPA_PORT_AUDIO)) !=
 			(LADSPA_PORT_INPUT | LADSPA_PORT_AUDIO)) {
 		SNDERR("Problem with control file %s.", controls);
 		return -1;
 	}
-	if(equal->klass->PortDescriptors[equal->control_data->output_index] !=
+	if((equal->klass->PortDescriptors[equal->control_data->output_index] &
+			(LADSPA_PORT_OUTPUT | LADSPA_PORT_AUDIO)) !=
 			(LADSPA_PORT_OUTPUT | LADSPA_PORT_AUDIO)) {
 		SNDERR("Problem with control file %s.", controls);
 		return -1;

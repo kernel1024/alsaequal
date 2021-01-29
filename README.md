@@ -1,35 +1,38 @@
 Alsaequal is a real-time adjustable equalizer plugin for ALSA. It can
 be adjusted using any ALSA compatible mixer, e.g. alsamixergui.
 
-Alsaequal uses the Eq CAPS LADSPA Plugin for audio processing, actually
+Alsaequal uses the Eq10 CAPS LADSPA Plugin for audio processing, actually
 alsaequal is a generic LADSPA plugin interface with real-time access to
 the LADSPA controls (the LADSPA plugin included with alsa doesn't allow
 for real-time controls) but it was developed for and only tested with
-Eq CAPS LADSPA plugin. You are welcome to try it with other plugins, it
+Eq10 CAPS LADSPA plugin. You are welcome to try it with other plugins, it
 may work. Let me know how it goes, you can reach me at
 <charles@thedigitalmachine.net>.
 
-INSTALL:
+# INSTALL:
 Download the latest version of the plugin and:
 
+``` bash
 tar xvjf alsaequal-x.x.tar.bz2
 cd alsaequal-x.x
 make
 sudo make install
+```
 
-DEPENDANCIES:
+# DEPENDANCIES:
 - CAPS LADSPA Package -- <http://quitte.de/dsp/caps.html>, it's
-available as a package in Ubuntu, i.e. "sudo apt-get install caps"
+available as a package in Ubuntu, i.e. `sudo apt-get install caps`
 - ALSA Development headers and alsa-lib -- you may already have it
 as part of your linux distro, you can install in Ubuntu with
-"sudo apt-get install libasound2-dev"
+`sudo apt-get install libasound2-dev`
 
 
-USAGE:
+# USAGE:
 After installing you will have to modify your local .asoundrc alsa
 configuration file, adding something like this. If you're not using
-sound card 0 modify "plughw:0,0" accordingly.
+sound card 0 modify `"plughw:0,0"` accordingly.
 
+``` info
 ctl.equal {
 	type equal;
 }
@@ -39,34 +42,41 @@ pcm.plugequal {
 	slave.pcm "plughw:0,0";
 }
 
-pcm.equal{
+pcm.equal {
     type plug;
     slave.pcm plugequal;
 }
+```
 
 You can play audio through alsaequal by addressing the plugin by name, e.g.:
+``` bash
 mpg123 -a equal 06.Back_In_Black.mp3
+```
 
 You can adjust the frequency response of the equalizer by using any alsa
-mixer, e.g.:  alsamixer -D equal
+mixer, e.g.:
+``` bash
+alsamixer -D equal
+```
 
-HELP:
+# HELP:
 If you need any help just let me know, you can reach me at:
 <charles@thedigitalmachine.net>. Please keep in mind that this is
 a development release and may have bugs.
 
-More Advanced Stuff:
+# More Advanced Stuff:
 If you want to try out alsaequal with other plugins the configuration
-(asoundrd) structure follows:
+(asoundrc) structure follows:
 
+``` info
 ctl.<name_equal> {
 	type equal;
 	controls -- filename used to store the equalizer settings,
 					the default is $HOME/.alsaequal.bin
-	library -- location of the LADSPA library, the default is
-					"/usr/lib/ladspa/caps.so"
+	library -- location of the LADSPA library, the default is to search for
+					"caps.so" in LD_LIBRARY_PATH
 	module -- module name within the LADSPA library, the deafault
-					is "Eq"
+					is "Eq10"
 	channels -- number of channels, the default is 2
 }
 
@@ -78,17 +88,20 @@ pcm.<name_pcm> {
 					the data type, outputig directly to hw won't;
 	controls -- filename used to store the equalizer settings,
 					the default is $HOME/.alsaequal.bin
-	library -- location of the LADSPA library, the default is
-					"/usr/lib/ladspa/caps.so"
+	library -- location of the LADSPA library, the default is to search for
+					"caps.so" in LD_LIBRARY_PATH
 	module -- module name within the LADSPA library, the deafault
-					is "Eq"
+					is "Eq10"
 	channels -- number of channels, the default is 2
 }
+```
 
 You will also probably need to pump the data through a plug to change
 the format to float, which is all alsaequal supports.
 
-pcm.<name_pcm_plug>{
+``` info
+pcm.<name_pcm_plug> {
     type plug;
     slave.pcm <name_pcm>;
 }
+```

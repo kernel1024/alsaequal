@@ -341,9 +341,11 @@ LADSPA_Control * LADSPAcontrolMMAP(const LADSPA_Descriptor *psDescriptor,
 			default_controls->output_index = -1;
 			for(i = 0, index=0; i < psDescriptor->PortCount; i++) {
 				if(psDescriptor->PortDescriptors[i]&LADSPA_PORT_CONTROL) {
-						default_controls->control[index].index = i;
-						LADSPADefault(&psDescriptor->PortRangeHints[i], 44100,
-								&default_controls->control[index].data[0]);
+					default_controls->control[index].index = i;
+					if (LADSPADefault(&psDescriptor->PortRangeHints[i], 44100,
+							&default_controls->control[index].data[0]) < 0) {
+						default_controls->control[index].data[0] = 0;
+					}
 					for(j = 1; j < channels; j++) {
 						default_controls->control[index].data[j] =
 								default_controls->control[index].data[0];
@@ -425,6 +427,7 @@ LADSPA_Control * LADSPAcontrolMMAP(const LADSPA_Descriptor *psDescriptor,
 }
 
 void writeSyslog(char * fmt,...) {
+#ifdef DEBUG
 	static int opened = 0;
 	char buf[2048];
 	va_list ap;
@@ -436,4 +439,5 @@ void writeSyslog(char * fmt,...) {
 	va_start(ap, fmt);
 	vsyslog(LOG_DEBUG, buf, ap);
 	va_end(ap);
+#endif
 }

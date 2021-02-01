@@ -271,6 +271,9 @@ SND_CTL_PLUGIN_DEFINE_FUNC(equal)
 	}
 
 	/* Pull in data from controls file */
+	if(equal->num_input_controls == 0) {
+		return -1;
+	}
 	equal->control_info = malloc(
 			sizeof(snd_ctl_equal_control_t)*equal->num_input_controls);
 	if(equal->control_info == NULL) {
